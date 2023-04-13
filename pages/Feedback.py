@@ -260,14 +260,21 @@ class Form:
         fInput = st.session_state["fInput"]
         rInput = st.session_state["rInput"]
 
-        print(self.currDate)
+        result = cur.execute("""SELECT MAX(ID) FROM FEEDBACKFORM""")
+        id = result.fetchone()[-1]
 
-        r = cur.execute(
-            f"""INSERT INTO FEEDBACKFORM VALUES({str(self.ipId)}, {self.currDate}, '{dInput}', '{nInput}', '{mInput}', '{mcInput}', '{aOInput}', '{fInput}', '{rInput}')"""
+        cur.execute(
+            f"""INSERT INTO FEEDBACKFORM VALUES({int(id+1)}, {str(self.ipId)}, '{self.currDate}', '{dInput}', '{nInput}', '{mInput}', '{mcInput}', '{aOInput}', '{fInput}', '{rInput}')"""
         )
-        print(r)
-        # conn.commit()
+        conn.commit()
         conn.close()
+        st.session_state["dInput"] = "Yes"
+        st.session_state["nInput"] = "Yes"
+        st.session_state["mInput"] = "Yes"
+        st.session_state["mCInput"] = ""
+        st.session_state["aOInput"] = ""
+        st.session_state["fInput"] = "Positive"
+        st.session_state["rInput"] = ""
 
     def run(self):
         with st.form("Feedback Form"):
@@ -290,17 +297,52 @@ class Form:
             st.form_submit_button("Submit", on_click=self.saveONDB)
 
 
+class OTForm:
+    def __init__(self, currDate):
+        self.currDate = currDate
+        self.ot = [
+            "Select",
+            "OPERATION THEATRE",
+            "CARDIAC OPERATION THEATER",
+            "Post Operative Ward",
+            "OPERATIONS",
+        ]
+
+    def saveONDB(self):
+        conn, cur = initDb()
+        result = cur.execute("""SELECT MAX(ID) FROM DETAILS""")
+        id = result.fetchone()[-1]
+        cur.execute(
+            f"""INSERT INTO DETAILS VALUES({int(id+1)}, "{st.session_state['OT']}", "", "", "", "", "", "", "", "", "", "", "", "","", "", "", "", "", "", "", "",'{st.session_state['complains']}', '{st.session_state['actionTaken']}')"""
+        )
+        conn.commit()
+        conn.close()
+
+        st.session_state["OT"] = "Select"
+        st.session_state["complains"] = ""
+        st.session_state["actionTaken"] = ""
+
+    def run(self):
+        with st.form("OT Form"):
+            ot = st.selectbox("OT", self.ot, key="OT")
+            complains = st.text_area("Complains", key="complains")
+            action = st.text_area("Actions Taken", key="actionTaken")
+
+            button = st.form_submit_button("Save", on_click=self.saveONDB)
+
+
 if __name__ == "__main__":
-    # if LoginFunction():
-    date = st.date_input("Date", key="currDate")
+    if LoginFunction():
+        date = st.date_input("Date", key="currDate")
 
-    wardFeedback, otFeedback = st.tabs(["Ward Feedback", "OT Feedback"])
+        wardFeedback, otFeedback = st.tabs(["Ward Feedback", "OT Feedback"])
 
-    with wardFeedback:
-        fform = FeedbackFunction()
-        fform.run()
-        form = Form(date)
-        form.run()
+        with wardFeedback:
+            fform = FeedbackFunction()
+            fform.run()
+            form = Form(date)
+            form.run()
 
-    with otFeedback:
-        st.header("OT")
+        with otFeedback:
+            otform = OTForm(date)
+            otform.run()

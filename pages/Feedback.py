@@ -11,9 +11,6 @@ wards = []
 rooms = []
 patients = []
 
-if "loginAuth" not in st.session_state:
-    st.session_state["loginAuth"] = False
-
 
 def loginAuth():
     conn, cur = initDb()
@@ -86,7 +83,9 @@ class FeedbackFunction:
         global wards
         wards = []
 
-        results = cur.execute("SELECT DISTINCT WARDID FROM DETAILS").fetchall()
+        results = cur.execute(
+            "SELECT DISTINCT WARDID FROM DETAILS WHERE IPID NOT LIKE '';"
+        ).fetchall()
         try:
             wards = [i[0] for i in results]
             wards.insert(0, "Select")
@@ -115,19 +114,20 @@ class FeedbackFunction:
 
     def thirdSearch(self):
         global patients
-        patients = []
+        # patients = []
         conn, cur = initDb()
 
         roomno = st.session_state["roomno"]
         results = cur.execute(
             f'SELECT IPID FROM DETAILS WHERE ROOMNO = "{roomno}"'
         ).fetchall()
-        try:
-            patients = [i[0] for i in results]
-            patients.insert(0, "Select")
-        except IndexError or TypeError:
-            st.error("No Patient in Room: {roomno}")
-        conn.close()
+        if len(results) > 0:
+            try:
+                patients = [i[0] for i in results]
+                patients.insert(0, "Select")
+            except IndexError or TypeError:
+                st.error("No Patient in Room: {roomno}")
+            conn.close()
 
     def fillFunc(self):
         conn, cur = initDb()
@@ -300,13 +300,14 @@ class Form:
 class OTForm:
     def __init__(self, currDate):
         self.currDate = currDate
-        self.ot = [
-            "Select",
-            "OPERATION THEATRE",
-            "CARDIAC OPERATION THEATER",
-            "Post Operative Ward",
-            "OPERATIONS",
-        ]
+        conn, cur = initDb()
+
+        results = cur.execute(
+            """SELECT DISTINCT WARDID FROM DETAILS WHERE IPID LIKE '';"""
+        ).fetchall()
+        self.ot = [i[0] for i in results]
+        self.ot.insert(0, "Select")
+        conn.close()
 
     def saveONDB(self):
         conn, cur = initDb()
@@ -317,6 +318,7 @@ class OTForm:
         )
         conn.commit()
         conn.close()
+        st.success("Feedback Saved")
 
         st.session_state["OT"] = "Select"
         st.session_state["complains"] = ""
@@ -332,7 +334,13 @@ class OTForm:
 
 
 if __name__ == "__main__":
-    if LoginFunction():
+    if "loginAuth" not in st.session_state:
+        st.session_state["loginAuth"] = False
+
+    if st.session_state["loginAuth"] == False:
+        LoginFunction()
+
+    if st.session_state["loginAuth"] == True:
         date = st.date_input("Date", key="currDate")
 
         wardFeedback, otFeedback = st.tabs(["Ward Feedback", "OT Feedback"])

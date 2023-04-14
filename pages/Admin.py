@@ -2,9 +2,6 @@ import streamlit as st
 
 from utilty import initDb, clearSession
 
-if "adminAuth" not in st.session_state:
-    st.session_state["adminAuth"] = False
-
 
 def adminLoginAuth():
     conn, cur = initDb()
@@ -42,7 +39,11 @@ def adminLogin():
 
 
 if __name__ == "__main__":
-    adminLogin()
+    if "adminAuth" not in st.session_state:
+        st.session_state["adminAuth"] = False
+        
+    if st.session_state['adminAuth'] == False:
+        adminLogin()
 
     if st.session_state["adminAuth"] == True:
         st.header("Not Admin")

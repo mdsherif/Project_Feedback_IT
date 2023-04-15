@@ -41,54 +41,80 @@ def firstLoad(table):
 #     conn.close()
 
 
-def loadDf(df):
-    col1, col2, col3, col4, col5, col6, col7, col8, col9 = st.columns(9, gap="small")
+# def loadDf(df):
+#     col1, col2, col3, col4, col5, col6, col7, col8, col9 = st.columns(9, gap="small")
 
-    col1.text_input("IPID", key="changeIp")
-    col2.text_input("Feedback Date")
-    col3.text_input("Sat With Doctor")
-    col4.text_input("Sat With Nurse")
-    col5.text_input("Medicine Given Timely")
-    col6.text_input("Complains")
-    col7.text_input("Any Other Complains")
-    col8.text_input("Feedback Type")
-    col9.text_input("Remarks")
+#     col1.text_input("IPID", key="changeIp")
+#     col2.text_input("Feedback Date")
+#     col3.text_input("Sat With Doctor")
+#     col4.text_input("Sat With Nurse")
+#     col5.text_input("Medicine Given Timely")
+#     col6.text_input("Complains")
+#     col7.text_input("Any Other Complains")
+#     col8.text_input("Feedback Type")
+#     col9.text_input("Remarks")
 
-    return df
+#     return df
 
 
 def genReport(booleanValue):
     if booleanValue:
         df = firstLoad("FEEDBACKFORM")
+        csvFile = df.to_csv().encode("utf-8")
+
+        df.to_excel("temp.xlsx")
+        with open("./temp.xlsx", "rb") as template_file:
+            template_byte = template_file.read()
+
+        copy, csv, excel, _, _, _, _, _, _, _, _, _, _, _ = st.columns(14)
+
+        copy.button("COPY", on_click=df.to_clipboard, key="copyforward")
+
+        csv.download_button(
+            label="CSV",
+            data=csvFile,
+            file_name="Data.csv",
+            mime="text/csv",
+        )
+        excel.download_button(
+            label="Excel",
+            data=template_byte,
+            file_name="Data.xlsx",
+            mime="application/octet-stream",
+        )
+        st.session_state["df"] = df
+
+        st.dataframe(st.session_state["df"])
+
     else:
         df = firstLoad("DETAILS")
 
-    csvFile = df.to_csv().encode("utf-8")
+        csvFile = df.to_csv().encode("utf-8")
 
-    df.to_excel("temp.xlsx")
-    with open("./temp.xlsx", "rb") as template_file:
-        template_byte = template_file.read()
+        df.to_excel("temp.xlsx")
+        with open("./temp.xlsx", "rb") as template_file:
+            template_byte = template_file.read()
 
-    copy, csv, excel, _, _, _, _, _, _, _, _, _, _, _ = st.columns(14)
+        copy, csv, excel, _, _, _, _, _, _, _, _, _, _, _ = st.columns(14)
 
-    copy.button("COPY", on_click=df.to_clipboard)
+        copy.button("COPY", on_click=df.to_clipboard, key="copyforot")
 
-    csv.download_button(
-        label="CSV",
-        data=csvFile,
-        file_name="Data.csv",
-        mime="text/csv",
-    )
-    excel.download_button(
-        label="Excel",
-        data=template_byte,
-        file_name="Data.xlsx",
-        mime="application/octet-stream",
-    )
+        csv.download_button(
+            label="CSV",
+            data=csvFile,
+            file_name="Data.csv",
+            mime="text/csv",
+        )
+        excel.download_button(
+            label="Excel",
+            data=template_byte,
+            file_name="Data.xlsx",
+            mime="application/octet-stream",
+        )
 
-    st.session_state["df"] = loadDf(df)
+        st.session_state["df"] = df
 
-    st.dataframe(st.session_state["df"])
+        st.dataframe(st.session_state["df"])
 
 
 if __name__ == "__main__":
@@ -101,7 +127,7 @@ if __name__ == "__main__":
 
     wardReport, otReport = st.tabs(["Ward Report", "OT Report"])
 
-    if wardReport:
+    with wardReport:
         genReport(True)
-    elif otReport:
+    with otReport:
         genReport(False)

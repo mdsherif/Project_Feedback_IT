@@ -17,3 +17,11 @@ def clearSession(value):
     elif value == "admin":
         st.session_state["Admin_Username"] = ""
         st.session_state["Admin_Password"] = ""
+
+
+otWards = [
+    "OPERATION THEATRE",
+    "CARDIAC OPERATION THEATER",
+    "Post Operative Ward",
+    "OPERATIONS",
+]

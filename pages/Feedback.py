@@ -305,7 +305,14 @@ class OTForm:
         results = cur.execute(
             """SELECT DISTINCT WARDID FROM DETAILS WHERE IPID LIKE '';"""
         ).fetchall()
-        self.ot = [i[0] for i in results]
+
+        if len(results) > 0:
+            self.ot = [i[0] for i in results]
+        else:
+            from utilty import otWards
+
+            self.ot = otWards
+
         self.ot.insert(0, "Select")
         conn.close()
 
@@ -314,7 +321,7 @@ class OTForm:
         result = cur.execute("""SELECT MAX(ID) FROM DETAILS""")
         id = result.fetchone()[-1]
         cur.execute(
-            f"""INSERT INTO DETAILS VALUES({int(id+1)}, "{st.session_state['OT']}", "", "", "", "", "", "", "", "", "", "", "", "","", "", "", "", "", "", "", "",'{st.session_state['complains']}', '{st.session_state['actionTaken']}')"""
+            f"""INSERT INTO DETAILS VALUES({int(id+1)}, "{st.session_state['OT']}", "", "", "", "", "", "", "", "", "", "", "", "","", "", "", "", "", "", "", "",'{st.session_state['complains']}', '{st.session_state['actionTaken']}', '{self.currDate}')"""
         )
         conn.commit()
         conn.close()
@@ -323,6 +330,7 @@ class OTForm:
         st.session_state["OT"] = "Select"
         st.session_state["complains"] = ""
         st.session_state["actionTaken"] = ""
+        st.session_state["currDate"] = datetime.now()
 
     def run(self):
         with st.form("OT Form"):

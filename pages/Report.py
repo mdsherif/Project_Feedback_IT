@@ -6,18 +6,23 @@ from utilty import initDb
 st.set_page_config(layout="wide")
 
 
-def firstLoad():
+def firstLoad(table):
     conn, cur = initDb()
 
     fromDate = st.session_state["fromDate"]
     toDate = st.session_state["toDate"]
+    if table == "FEEDBACKFORM":
+        df = pd.read_sql_query("""SELECT * FROM FEEDBACKFORM;""", conn)
 
-    df = pd.read_sql_query("""SELECT * FROM FEEDBACKFORM;""", conn)
+    elif table == "DETAILS":
+        df = pd.read_sql_query(
+            """SELECT WARDID, OTCOMPLAINS, ACTION_TAKEN, DATE_OF_FEEDBACK FROM DETAILS""",
+            conn,
+        )
+
     df["DATE_OF_FEEDBACK"] = pd.to_datetime(df["DATE_OF_FEEDBACK"])
     df = df[df["DATE_OF_FEEDBACK"].isin(pd.date_range(fromDate, toDate))]
-
     conn.close()
-
     return df
 
 
@@ -52,9 +57,11 @@ def loadDf(df):
     return df
 
 
-def genReport():
-    df = firstLoad()
-    df = df.reset_index(drop=True)
+def genReport(booleanValue):
+    if booleanValue:
+        df = firstLoad("FEEDBACKFORM")
+    else:
+        df = firstLoad("DETAILS")
 
     csvFile = df.to_csv().encode("utf-8")
 
@@ -92,5 +99,9 @@ if __name__ == "__main__":
 
     genBtn = st.button("Generate")
 
-    if genBtn:
-        genReport()
+    wardReport, otReport = st.tabs(["Ward Report", "OT Report"])
+
+    if wardReport:
+        genReport(True)
+    elif otReport:
+        genReport(False)

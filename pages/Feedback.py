@@ -294,7 +294,9 @@ class Form:
                 key="fInput",
             )
             rInput = st.text_area("Any Other Remarks", key="rInput")
-            st.form_submit_button("Submit", on_click=self.saveONDB)
+            msgTrigger = st.form_submit_button("Submit", on_click=self.saveONDB)
+            if msgTrigger:
+                st.success("Feedback Saved")
 
 
 class OTForm:

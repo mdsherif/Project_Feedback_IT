@@ -5,7 +5,7 @@ from datetime import datetime
 from config import config
 from utilty import initDb, clearSession
 
-st.set_page_config(page_title=config.feedback)
+st.set_page_config(page_title=config.feedback, layout="centered")
 
 wards = []
 rooms = []

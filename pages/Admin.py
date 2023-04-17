@@ -83,8 +83,8 @@ class Admin:
         ).fetchall()
         conn.close
 
-        for result in self.finalResult:
-            st.text_input("IPID", value=result[1])
+        for i, result in enumerate(self.finalResult):
+            st.text_input("IPID", value=result[1], key=i)
 
     def clearFunc(self):
         # st.session_state['date'] = datetime.datetime.now().date
@@ -99,9 +99,9 @@ class Admin:
 
         col3.selectbox("Rooms", rooms, key="room")
         btnCol1, btnCol2, _, _, _, _ = st.columns(6)
-        if btnCol1.button("Submit"):
+        btnCol1.button("Clear", on_click=self.clearFunc)
+        if btnCol2.button("Submit"):
             self.finalSearch()
-        btnCol2.button("Clear", on_click=self.clearFunc)
 
 
 if __name__ == "__main__":

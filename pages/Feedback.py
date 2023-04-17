@@ -41,18 +41,17 @@ def loginAuth():
 
 def LoginFunction():
     st.title("Login")
+    with st.form("Login"):
+        col1, col2, col3 = st.columns(3)
+        profession = col1.selectbox(
+            "Profession",
+            ["Select", "Nursing", "Guest Relation", "Doctor"],
+            key="profession",
+        )
+        username = col2.text_input("Username", key="username")
+        password = col3.text_input("Password", key="password", type="password")
 
-    col1, col2, col3 = st.columns(3)
-
-    profession = col1.selectbox(
-        "Profession",
-        ["Select", "Nursing", "Guest Relation", "Doctor"],
-        key="profession",
-    )
-    username = col2.text_input("Username", key="username")
-    password = col3.text_input("Password", key="password", type="password")
-
-    button = st.button("Login", on_click=loginAuth)
+        button = st.form_submit_button("Login", on_click=loginAuth)
 
     return st.session_state["loginAuth"]
 
@@ -252,6 +251,8 @@ class Form:
 
     def saveONDB(self):
         conn, cur = initDb()
+        wardid = st.session_state["ward"]
+        roomno = st.session_state["roomno"]
         dInput = st.session_state["dInput"]
         nInput = st.session_state["nInput"]
         mInput = st.session_state["mInput"]
@@ -263,8 +264,11 @@ class Form:
         result = cur.execute("""SELECT MAX(ID) FROM FEEDBACKFORM""")
         id = result.fetchone()[-1]
 
+        if not id:
+            id = 1
+
         cur.execute(
-            f"""INSERT INTO FEEDBACKFORM VALUES({int(id+1)}, {str(self.ipId)}, '{self.currDate}', '{dInput}', '{nInput}', '{mInput}', '{mcInput}', '{aOInput}', '{fInput}', '{rInput}')"""
+            f"""INSERT INTO FEEDBACKFORM VALUES({int(id+1)}, {str(self.ipId)}, '{wardid}', '{roomno}','{self.currDate}', '{dInput}', '{nInput}', '{mInput}', '{mcInput}', '{aOInput}', '{fInput}', '{rInput}')"""
         )
         conn.commit()
         conn.close()

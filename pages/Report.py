@@ -113,8 +113,8 @@ def genReport(booleanValue):
         )
 
         st.session_state["df"] = df
-
-        st.dataframe(st.session_state["df"])
+        with st.container():
+            st.dataframe(st.session_state["df"], use_container_width=True)
 
 
 if __name__ == "__main__":
@@ -126,8 +126,8 @@ if __name__ == "__main__":
     genBtn = st.button("Generate")
 
     wardReport, otReport = st.tabs(["Ward Report", "OT Report"])
-
-    with wardReport:
-        genReport(True)
-    with otReport:
-        genReport(False)
+    if genBtn:
+        with wardReport:
+            genReport(True)
+        with otReport:
+            genReport(False)
